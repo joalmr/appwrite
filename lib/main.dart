@@ -2,6 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/web.dart';
 
 Future<void> main() async {
@@ -45,10 +46,13 @@ class _MainAppState extends State<MainApp> {
               TextButton(
                 onPressed: () async {
                   try {
-                    final res = await widget.account
+                    // GoogleSignInAccount? googleUser =
+                    //     await GoogleSignIn().signIn();
+
+                    final response = await widget.account
                         .createOAuth2Session(provider: 'google');
 
-                    Logger().i('Google signin', error: res);
+                    Logger().i('Google signin', error: response);
 
                     user = await widget.account.get();
 
@@ -69,6 +73,13 @@ class _MainAppState extends State<MainApp> {
               TextButton(
                 onPressed: () async {
                   try {
+                    final response = await widget.account
+                        .deleteSession(sessionId: 'current');
+
+                    // await GoogleSignIn().signOut();
+
+                    Logger().i('Log out', error: response);
+
                     setState(() {
                       name = '';
                     });
