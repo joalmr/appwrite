@@ -1,16 +1,17 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/web.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await dotenv.load(fileName: ".env");
   Client client = Client();
 
   client
-      .setEndpoint('https://cloud.appwrite.io/v1')
-      .setProject('6604b3becd694d057bf5')
+      .setEndpoint(dotenv.env['ENDPOINT']!)
+      .setProject(dotenv.env['KEY_PROJECT']!)
       .setSelfSigned(status: true);
 
   Account account = Account(client);
@@ -28,6 +29,7 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   String name = '';
+  User? user;
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +50,15 @@ class _MainAppState extends State<MainApp> {
 
                     Logger().i('Google signin', error: res);
 
-                    User? user = await widget.account.get();
+                    user = await widget.account.get();
 
-                    Logger().i('User', error: user.name);
+                    if (user != null) {
+                      Logger().i('User', error: user!.name);
 
-                    setState(() {
-                      name = user.name;
-                    });
+                      setState(() {
+                        name = user!.name;
+                      });
+                    }
                   } on AppwriteException catch (e) {
                     Logger().i('AppwriteException::', error: e.message);
                   }
@@ -62,6 +66,18 @@ class _MainAppState extends State<MainApp> {
                 child: const Text('Google'),
               ),
               Text(name),
+              TextButton(
+                onPressed: () async {
+                  try {
+                    setState(() {
+                      name = '';
+                    });
+                  } on AppwriteException catch (e) {
+                    Logger().i('AppwriteException::', error: e.message);
+                  }
+                },
+                child: const Text('Salir'),
+              ),
             ],
           ),
         ),
